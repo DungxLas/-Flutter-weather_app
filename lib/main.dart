@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:weather_app/weather_api.dart';
 
@@ -33,11 +35,19 @@ class _MyHomePageState extends State<MyHomePage> {
   WeatherAPI weatherAPI = WeatherAPI();
   String city = 'Hanoi';
   var _weatherData;
+  var _temp;
+  var _cond;
+  var _condDetail;
+  var _condIcon;
 
   void fetchWeatherData() async {
     var data = await weatherAPI.getWeather(city);
     setState(() {
       _weatherData = data;
+      _temp = data['main']['temp'].toString();
+      _cond = data['weather'][0]['main'].toString();
+      _condDetail = data['weather'][0]['description'];
+      _condIcon = data['weather'][0]['icon'];
     });
   }
 
@@ -50,29 +60,45 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              decoration: const InputDecoration(hintText: 'Enter city name'),
-              onChanged: (value) => city = value,
-            ),
-            ElevatedButton(
-              onPressed: fetchWeatherData,
-              child: const Text('Submit'),
-            ),
-            _weatherData != null
-                ? Expanded(
-                    child: Text(
-                      'City: $city Temperature: ${_weatherData['main']['temp']}°K Condition: ${_weatherData['weather'][0]['description']}',
+      body: _weatherData != null
+          ? Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('lib/imageSource/$_cond.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Stack(
+                children: [
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: Container(
+                      color: Colors.black.withOpacity(0),
                     ),
-                  )
-                : const Center(child: CircularProgressIndicator()),
-          ],
-        ),
-      ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        TextField(
+                          decoration: const InputDecoration(
+                              hintText: 'Enter city name'),
+                          onChanged: (value) => city = value,
+                        ),
+                        ElevatedButton(
+                          onPressed: fetchWeatherData,
+                          child: const Text('Submit'),
+                        ),
+                        Text(
+                          'City: $city Temperature: $_temp°K Condition: $_condDetail',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : const Center(child: CircularProgressIndicator()),
     );
   }
 }
