@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_app/weather_api.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,32 +30,49 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  WeatherAPI weatherAPI = WeatherAPI();
+  String city = 'Hanoi';
+  var _weatherData;
+
+  void fetchWeatherData() async {
+    var data = await weatherAPI.getWeather(city);
+    setState(() {
+      _weatherData = data;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchWeatherData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      //   title: Text(widget.title),
-      // ),
+      appBar: AppBar(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            TextField(
+              decoration: const InputDecoration(hintText: 'Enter city name'),
+              onChanged: (value) => city = value,
             ),
-            // Text(
-            //   '$_counter',
-            //   style: Theme.of(context).textTheme.headlineMedium,
-            // ),
+            ElevatedButton(
+              onPressed: fetchWeatherData,
+              child: const Text('Submit'),
+            ),
+            _weatherData != null
+                ? Expanded(
+                    child: Text(
+                      'City: $city Temperature: ${_weatherData['main']['temp']}°K Condition: ${_weatherData['weather'][0]['description']}',
+                    ),
+                  )
+                : const Center(child: CircularProgressIndicator()),
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _incrementCounter,
-      //   tooltip: 'Increment',
-      //   child: const Icon(Icons.add),
-      // ),
     );
   }
 }
