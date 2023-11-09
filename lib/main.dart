@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:weather_app/info.dart';
+import 'package:weather_app/input.dart';
 import 'package:weather_app/weather_api.dart';
 
 void main() {
@@ -33,19 +35,20 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   WeatherAPI weatherAPI = WeatherAPI();
-  String city = 'Hanoi';
+  var _city;
   var _weatherData;
   var _temp;
   var _cond;
   var _condDetail;
   var _condIcon;
 
-  void fetchWeatherData() async {
+  void fetchWeatherData(String city) async {
     var data = await weatherAPI.getWeather(city);
     setState(() {
       _weatherData = data;
-      _temp = data['main']['temp'].toString();
-      _cond = data['weather'][0]['main'].toString();
+      _city = city;
+      _temp = data['main']['temp'].toStringAsFixed(0);
+      _cond = data['weather'][0]['main'];
       _condDetail = data['weather'][0]['description'];
       _condIcon = data['weather'][0]['icon'];
     });
@@ -54,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    fetchWeatherData();
+    fetchWeatherData('Hanoi');
   }
 
   @override
@@ -76,21 +79,22 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.black.withOpacity(0),
                     ),
                   ),
-                  Center(
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        TextField(
-                          decoration: const InputDecoration(
-                              hintText: 'Enter city name'),
-                          onChanged: (value) => city = value,
+                        Info(
+                          city: _city,
+                          temp: _temp,
+                          condDetail: _condDetail,
+                          condIcon: _condIcon,
                         ),
-                        ElevatedButton(
-                          onPressed: fetchWeatherData,
-                          child: const Text('Submit'),
-                        ),
-                        Text(
-                          'City: $city Temperature: $_temp°K Condition: $_condDetail',
+                        Input(
+                          city: _city,
+                          fetchWeatherData: fetchWeatherData,
                         ),
                       ],
                     ),

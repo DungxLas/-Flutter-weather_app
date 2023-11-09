@@ -13,6 +13,7 @@ class WeatherAPI {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
+      // ignore: avoid_print
       print(response.statusCode);
     }
   }
